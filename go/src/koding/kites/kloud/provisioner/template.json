@@ -15,16 +15,11 @@
             "ami_name": "koding-base-latest-{{timestamp}}",
             "ami_description": "Koding Base Image",
             "instance_type": "m3.medium",
-            "region": "us-east-1",
-            "source_ami": "ami-680fd500",
-            "subnet_id": "subnet-98d30fef",
-            "vpc_id": "vpc-bf65dada",
+            "region": "ap-northeast-1",
+            "source_ami": "ami-9e5cff9e",
+            "subnet_id": "subnet-7e66e209",
+            "vpc_id": "vpc-ef17be8a",
             "ssh_username": "ubuntu",
-            "ami_regions": [
-                "eu-west-1",
-                "us-west-2",
-                "ap-southeast-1"
-            ],
             "tags": {
                 "Name": "koding-test"
             }
@@ -144,6 +139,9 @@
             "override": {
                 "virtualbox": {
                     "output": "ubuntu-14-04-x64-virtualbox.box"
+                },
+                "aws": {
+                    "output": "ubuntu-14-04-x64-aws.box"
                 }
             }
         }
