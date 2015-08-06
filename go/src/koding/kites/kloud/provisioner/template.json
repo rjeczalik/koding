@@ -85,6 +85,21 @@
     "provisioners": [
         {
             "type": "shell",
+            "execute_command": "echo 'vagrant'|sudo -S sh '{{.Path}}'",
+            "override": {
+                "virtualbox-iso": {
+                    "scripts": [
+                        "scripts/base.sh",
+                        "scripts/vagrant.sh",
+                        "scripts/virtualbox.sh",
+                        "scripts/cleanup.sh",
+                        "scripts/zerodisk.sh"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "shell",
             "script": "script.sh",
             "pause_before": "30s"
         },
