@@ -27,6 +27,7 @@ options = o =
   tag              : argv.tag
   environment      : argv.environment    or "dev"
   publicPort       : argv.publicPort     or "8090"
+  kontrolPort      : argv.kontrolPort    or "3000"
   target           : argv.target         or "localhost"
   onlyconfigure    : argv.onlyconfigure  or no
   runGoWatcher     : argv.hasOwnProperty 'with-go-watcher'

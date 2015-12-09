@@ -68,6 +68,7 @@ Configuration = (options={}) ->
 
 
   publicPort          = options.publicPort     or "8090"
+  kontrolPort         = options.kontrolPort    or "3000"
   hostname            = options.hostname       or "dev.koding.com"
   protocol            = options.protocol       or "http:"
   publicHostname      = options.publicHostname or "#{protocol}//#{hostname}"
@@ -107,7 +108,7 @@ Configuration = (options={}) ->
   customDomain        = { public: "#{scheme}://#{host}", public_: host, local: "http://#{local}", local_: "#{local}", host: "http://#{hostname}", port: 8090 }
 
   email               = { host:     "#{customDomain.public_}"                     , defaultFromMail:    'hello@koding.com'                      , defaultFromName:    'Koding'                    , forcedRecipient: "#{process.env.USER}@koding.com"                       }
-  kontrol             = { url:      "#{customDomain.public}/kontrol/kite"         , port:               3000                                    , useTLS:             no                          , certFile:        ""                                   , keyFile:  ""                          , publicKeyFile: "./certs/test_kontrol_rsa_public.pem"    , privateKeyFile: "./certs/test_kontrol_rsa_private.pem"}
+  kontrol             = { url:      "#{customDomain.public}/kontrol/kite"         , port:               "#{kontrolPort}"                          , useTLS:             no                          , certFile:        ""                                   , keyFile:  ""                          , publicKeyFile: "./certs/test_kontrol_rsa_public.pem"    , privateKeyFile: "./certs/test_kontrol_rsa_private.pem"}
   broker              = { name:     "broker"                                      , serviceGenericName: "broker"                                , ip:                 ""                          , webProtocol:     "http:"                              , host:     "#{customDomain.public}"    , port:          8008                                     , certFile:       ""                                       , keyFile:         ""          , authExchange: "auth"                , authAllExchange: "authAll" , failoverUri: "#{customDomain.public}" }
   regions             = { kodingme: "#{configName}"                               , vagrant:            "vagrant"                               , sj:                 "sj"                        , aws:             "aws"                                , premium:  "vagrant"                 }
   algolia             = { appId:    'DYVV81J2S1'                                  , indexSuffix:        ".#{ os.hostname() }"                   }
