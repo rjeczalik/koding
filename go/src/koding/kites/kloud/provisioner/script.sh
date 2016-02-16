@@ -6,14 +6,10 @@ export DEBIAN_FRONTEND=noninteractive
 
 sudo -E apt-get update -q
 sudo -E apt-get install -y -q ubuntu-standard ubuntu-minimal htop git net-tools \
-	aptitude apache2 php5 libapache2-mod-php5 php5-cgi ruby screen fish sudo \
-	mc iotop iftop software-properties-common python-fcgi ruby-fcgi \
-	silversearcher-ag ruby-dev ri rake python mercurial subversion cvs bzr \
-	default-jdk golang-go
+	aptitude apache2 screen fish sudo mc iotop iftop software-properties-common \
+	silversearcher-ag mercurial subversion cvs bzr
 
 sudo -E apt-get install --only-upgrade bash
-
-wget -q -O - http://nodejs.org/dist/v0.10.26/node-v0.10.26-linux-x64.tar.gz | sudo tar -C /usr/local/ --strip-components=1 -zxv
 
 # add this for backwards compability with our cloud-init script. Cloud
 # init tries to add the user to the docker group, but if it doesn't
@@ -36,11 +32,6 @@ sudo apt-get clean
 
 # update and rebuild index for locate command
 sudo updatedb
-
-# install kpm
-cd /usr/local/bin
-sudo wget -q https://github.com/koding/kpm-scripts/releases/download/v0.2.2/kpm
-sudo chmod +x /usr/local/bin/kpm
 
 # website template
 sudo a2enmod cgi
