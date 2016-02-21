@@ -49,6 +49,7 @@ func NewGroup() cli.CommandFactory {
 					"delete":    NewGroupDelete(),
 					"fixdomain": NewGroupFixDomain(),
 					"clean":     NewGroupClean(),
+					"seal":      NewGroupSeal(),
 				},
 			},
 		}
@@ -68,6 +69,38 @@ func (g *Group) Action(args []string) error {
 	defer modelhelper.Close()
 	g.Resource.ContextFunc = func([]string) context.Context { return ctx }
 	return g.Resource.Main(args)
+}
+
+type GroupSeal struct {
+	*groupUsers
+}
+
+func NewGroupSeal() *GroupSeal {
+	return &GroupSeal{
+		groupUsers: &groupUsers{},
+	}
+}
+
+func (*GroupSeal) Name() string {
+	return "seal"
+}
+
+func (cmd *GroupSeal) RegisterFlags(f *flag.FlagSet) {
+	cmd.groupUsers.RegisterFlags(f)
+}
+
+func (cmd *GroupSeal) Valid() error {
+	if err := cmd.groupUsers.Valid(); err != nil {
+		return err
+	}
+	if len(cmd.usernames) == 0 {
+		return errors.New("no valid provided for -users flag")
+	}
+	return nil
+}
+
+func (cmd *GroupSeal) Run(ctx context.Context) error {
+	return nil // TODO
 }
 
 type GroupClean struct {
