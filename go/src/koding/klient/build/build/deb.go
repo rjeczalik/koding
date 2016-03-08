@@ -60,6 +60,7 @@ func (d *Deb) Build() (string, error) {
 	// finally build with debuild to create .deb file
 	cmd := exec.Command("debuild", "-us", "-uc")
 	cmd.Dir = d.BuildFolder
+	cmd.Env = append(os.Environ(), "GOOS=linux", "GOARCH=arm")
 
 	if d.Debug {
 		cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
