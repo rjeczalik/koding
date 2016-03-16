@@ -793,7 +793,7 @@ Configuration = (options={}) ->
         websocket       : yes
         locations       : [
           {
-            location    : '~ ^\\/-\\/userproxy\\/(?<ip>.+?)\\/(?<rest>.*)'
+            location    : '~ ^\\/-\\/userproxy\\/(?<ip>[\d\.]+?)\\/(?<rest>.*)'
             proxyPass   : 'http://$ip:56789/$rest'
             extraParams : [
               'proxy_read_timeout 21600s;'
@@ -801,7 +801,7 @@ Configuration = (options={}) ->
             ]
           }
           {
-            location    : '~ ^\\/-\\/prodproxy\\/(?<ip>.+?)\\/(?<rest>.*)'
+            location    : '~ ^\\/-\\/prodproxy\\/(?<ip>[\d\.]+?)\\/(?<rest>.*)'
             proxyPass   : 'http://$ip:56789/$rest'
             extraParams : [
               'proxy_read_timeout 21600s;'
@@ -809,7 +809,7 @@ Configuration = (options={}) ->
             ]
           }
           {
-            location    : '~ ^\\/-\\/sandboxproxy\\/(?<ip>.+?)\\/(?<rest>.*)'
+            location    : '~ ^\\/-\\/sandboxproxy\\/(?<ip>[\d\.]+?)\\/(?<rest>.*)'
             proxyPass   : 'http://$ip:56789/$rest'
             extraParams : [
               'proxy_read_timeout 21600s;'
@@ -817,7 +817,7 @@ Configuration = (options={}) ->
             ]
           }
           {
-            location    : '~ ^\\/-\\/latestproxy\\/(?<ip>.+?)\\/(?<rest>.*)'
+            location    : '~ ^\\/-\\/latestproxy\\/(?<ip>[\d\.]+?)\\/(?<rest>.*)'
             proxyPass   : 'http://$ip:56789/$rest'
             extraParams : [
               'proxy_read_timeout 21600s;'
@@ -825,8 +825,53 @@ Configuration = (options={}) ->
             ]
           }
           {
-            location    : '~ ^\\/-\\/devproxy\\/(?<ip>.+?)\\/(?<rest>.*)'
+            location    : '~ ^\\/-\\/devproxy\\/(?<ip>[\d\.]+?)\\/(?<rest>.*)'
             proxyPass   : 'http://$ip:56789/$rest'
+            extraParams : [
+              'proxy_read_timeout 21600s;'
+              'proxy_send_timeout 21600s;'
+            ]
+          }
+          {
+            location    : '~ ^\\/-\\/userproxy\\/(?<hostname>.+?)\\/klient\\/kite(?<rest>.*)'
+            proxyPass   : 'http://$hostname/klient/kite$rest'
+            host        : $hostname
+            extraParams : [
+              'proxy_read_timeout 21600s;'
+              'proxy_send_timeout 21600s;'
+            ]
+          }
+          {
+            location    : '~ ^\\/-\\/prodproxy\\/(?<hostname>.+?)\\/klient\\/kite(?<rest>.*)'
+            proxyPass   : 'http://$hostname/klient/kite$rest'
+            host        : $hostname
+            extraParams : [
+              'proxy_read_timeout 21600s;'
+              'proxy_send_timeout 21600s;'
+            ]
+          }
+          {
+            location    : '~ ^\\/-\\/sandboxproxy\\/(?<hostname>.+?)\\/klient\\/kite(?<rest>.*)'
+            proxyPass   : 'http://$hostname/klient/kite$rest'
+            host        : $hostname
+            extraParams : [
+              'proxy_read_timeout 21600s;'
+              'proxy_send_timeout 21600s;'
+            ]
+          }
+          {
+            location    : '~ ^\\/-\\/latestproxy\\/(?<hostname>.+?)\\/klient\\/kite(?<rest>.*)'
+            proxyPass   : 'http://$hostname/klient/kite$rest'
+            host        : $hostname
+            extraParams : [
+              'proxy_read_timeout 21600s;'
+              'proxy_send_timeout 21600s;'
+            ]
+          }
+          {
+            location    : '~ ^\\/-\\/devproxy\\/(?<hostname>.+?)\\/klient\\/kite(?<rest>.*)'
+            proxyPass   : 'http://$hostname/klient/kite$rest'
+            host        : $hostname
             extraParams : [
               'proxy_read_timeout 21600s;'
               'proxy_send_timeout 21600s;'
