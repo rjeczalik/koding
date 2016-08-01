@@ -5,7 +5,7 @@ readOrGenerateSecrets = (file) ->
   secrets = {}
 
   if fs.existsSync(file)
-    secrets = require(file)
+    secrets = JSON.parse(fs.readFileSync(file))
   else
     secrets =
       terraformer: generate()
