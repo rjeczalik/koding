@@ -1,7 +1,32 @@
-secret = () -> Math.random().toString(36).slice(-16)
+generate = () -> Math.random().toString(36).slice(-16)
+
+readOrGenerateSecrets = (file) ->
+  fs = require('fs')
+  secrets = {}
+
+  if fs.exists(file)
+    secrets = require(file)
+  else
+    secrets =
+      terraformer: generate()
+      jwt: generate()
+      janitor: generate()
+      vmwatcher: generate()
+      kloud: generate()
+
+    try
+      fs.mkdirSync(require('path').dirname(file))
+    catch err
+      throw err unless err.code is 'EEXIST'
+
+    fs.writeFileSync(file, JSON.stringify(secrets))
+
+  return secrets
 
 module.exports = (options) ->
   kiteHome = "$KONFIG_PROJECTROOT/generated/kite_home/koding"
+
+  secrets = readOrGenerateSecrets("./generated/secrets.json")
 
   kodingdev_master_2016_05 =
     accessKeyId: ""
@@ -85,7 +110,7 @@ module.exports = (options) ->
     port: 2300
     region: options.region
     environment: options.environment
-    secretKey: secret()
+    secretKey: secrets.terraformer
     aws:
       key: awsKeys.worker_terraformer.accessKeyId
       secret: awsKeys.worker_terraformer.secretAccessKey
@@ -149,7 +174,7 @@ module.exports = (options) ->
   siftScience = ''
   siftSciencePublic = ''
   jwt =
-    secret: secret()
+    secret: secrets.jwt
     confirmExpiresInMinutes: 10080
   papertrail =
     destination: 'logs3.papertrailapp.com:13734'
@@ -172,9 +197,9 @@ module.exports = (options) ->
     public: ''
   janitor =
     port: "6700"
-    secretKey: secret()
+    secretKey: secrets.janitor
   vmwatcher =
-    secretKey: secret()
+    secretKey: secrets.vmwatcher
   segment = ''
   kontrol =
     publicKey: "$KONFIG_PROJECTROOT/generated/private_keys/kontrol/kontrol.pub"
@@ -182,7 +207,7 @@ module.exports = (options) ->
   kloud =
     publicKey: kontrol.publicKey
     privateKey: kontrol.privateKey
-    secretKey: secret()
+    secretKey: secrets.kloud
     janitorSecretKey: janitor.secretKey
     vmwatcherSecretKey: vmwatcher.secretKey
     terraformerSecretKey: terraformer.secretKey
