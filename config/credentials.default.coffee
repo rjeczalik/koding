@@ -4,7 +4,7 @@ readOrGenerateSecrets = (file) ->
   fs = require('fs')
   secrets = {}
 
-  if fs.exists(file)
+  if fs.existsSync(file)
     secrets = require(file)
   else
     secrets =
