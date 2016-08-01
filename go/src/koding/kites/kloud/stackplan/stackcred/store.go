@@ -70,6 +70,7 @@ type StoreOptions struct {
 	MongoDB       *mongodb.MongoDB
 	Log           logging.Logger
 	CredURL       *url.URL
+	KloudClientID string
 	ObjectBuilder *object.Builder
 	Client        *http.Client
 }

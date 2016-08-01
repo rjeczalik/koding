@@ -112,6 +112,10 @@ func (s *socialStore) Put(username string, creds map[string]interface{}) error {
 }
 
 func (s *socialStore) clientID(username string) (string, error) {
+	if s.KloudClientID != "" {
+		return s.KloudClientID, nil
+	}
+
 	if username == "" {
 		return "", errors.New("social store: empty username")
 	}

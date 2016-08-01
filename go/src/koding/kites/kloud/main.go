@@ -252,11 +252,14 @@ func newKite(conf *Config) *kite.Kite {
 		panic(err)
 	}
 
+	// TODO(rjeczalik): init kloud user
+
 	storeOpts := &stackcred.StoreOptions{
-		MongoDB: sess.DB,
-		Log:     sess.Log.New("stackcred"),
-		CredURL: credURL,
-		Client:  httputil.DefaultRestClient(conf.DebugMode),
+		MongoDB:       sess.DB,
+		Log:           sess.Log.New("stackcred"),
+		CredURL:       credURL,
+		KloudClientID: "7fda8ac5-7623-4a2c-9d72-67b9e139085f",
+		Client:        httputil.DefaultRestClient(conf.DebugMode),
 	}
 
 	bp := &provider.BaseProvider{
