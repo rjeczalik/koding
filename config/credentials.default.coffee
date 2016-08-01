@@ -1,3 +1,5 @@
+secret = () -> Math.random().toString(36).slice(-16)
+
 module.exports = (options) ->
   kiteHome = "$KONFIG_PROJECTROOT/generated/kite_home/koding"
 
@@ -83,7 +85,7 @@ module.exports = (options) ->
     port: 2300
     region: options.region
     environment: options.environment
-    secretKey: ''
+    secretKey: secret()
     aws:
       key: awsKeys.worker_terraformer.accessKeyId
       secret: awsKeys.worker_terraformer.secretAccessKey
@@ -147,7 +149,7 @@ module.exports = (options) ->
   siftScience = ''
   siftSciencePublic = ''
   jwt =
-    secret: 'somesecretkeyhere'
+    secret: secret()
     confirmExpiresInMinutes: 10080
   papertrail =
     destination: 'logs3.papertrailapp.com:13734'
@@ -169,10 +171,10 @@ module.exports = (options) ->
     secret: ''
     public: ''
   janitor =
-    port: '6700'
-    secretKey: ''
+    port: "6700"
+    secretKey: secret()
   vmwatcher =
-    secretKey: ''
+    secretKey: secret()
   segment = ''
   kontrol =
     publicKey: "$KONFIG_PROJECTROOT/generated/private_keys/kontrol/kontrol.pub"
@@ -180,7 +182,7 @@ module.exports = (options) ->
   kloud =
     publicKey: kontrol.publicKey
     privateKey: kontrol.privateKey
-    secretKey: ''
+    secretKey: secret()
     janitorSecretKey: janitor.secretKey
     vmwatcherSecretKey: vmwatcher.secretKey
     terraformerSecretKey: terraformer.secretKey
