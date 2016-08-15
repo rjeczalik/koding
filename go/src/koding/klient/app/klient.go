@@ -284,19 +284,7 @@ func (k *Klient) Kite() *kite.Kite {
 
 // RegisterMethods registers all public available methods
 func (k *Klient) RegisterMethods() {
-	// don't allow anyone to call a method if we are during an update.
-	k.kite.PreHandleFunc(func(r *kite.Request) (interface{}, error) {
-		// Koding (kloud) connects to much, don't display it.
-		if r.Username != "koding" {
-			k.log.Info("Kite '%s/%s/%s' called method: '%s'",
-				r.Username, r.Client.Environment, r.Client.Name, r.Method)
-		}
-
-		k.updater.Wait.Wait()
-
-		return true, nil
-	})
-
+	k.kite.PreHandleFunc(k.waitForUpdate)
 	k.kite.PreHandleFunc(k.checkAuth)
 
 	// Metrics, is used by Kloud to get usage so Kloud can stop free VMs
@@ -653,6 +641,19 @@ func newKite(kconf *KlientConfig) *kite.Kite {
 	}
 
 	return k
+}
+
+func (k *Klient) waitForUpdate(r *kite.Request) (interface{}, error) {
+	// Koding (kloud) connects to much, don't display it.
+	if r.Username != "koding" {
+		k.log.Info("Kite '%s/%s/%s' called method: '%s'",
+			r.Username, r.Client.Environment, r.Client.Name, r.Method)
+	}
+
+	// don't allow anyone to call a method if we are during an update.
+	k.updater.Wait.Wait()
+
+	return true, nil
 }
 
 // checkAuth checks whether the given incoming request is authenticated or not.
