@@ -354,7 +354,7 @@ imports:
   - helpers
   - services
 - name: github.com/koding/kite
-  version: 8c48065408a4c4c2dffb4db08b6de9457d8236c7
+  version: 36adfee6e572ec3ab5ee59a8dfa870cbf38b527f
   subpackages:
   - config
   - dnode
