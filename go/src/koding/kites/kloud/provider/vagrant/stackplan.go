@@ -168,6 +168,9 @@ func (s *Stack) InjectVagrantData() (string, stackplan.KiteMap, error) {
 			ports = make([]interface{}, 0)
 		}
 
+		fmt.Printf("box: %# v\n", box)
+		fmt.Printf("ports: %# v\n", ports)
+
 		// klient kite port
 		kitePort := &vagrantapi.ForwardedPort{
 			HostPort:  2200,
