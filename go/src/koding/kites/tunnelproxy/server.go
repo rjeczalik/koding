@@ -1,9 +1,12 @@
 package tunnelproxy
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -16,6 +19,7 @@ import (
 	"time"
 
 	"koding/artifact"
+	konfig "koding/config"
 	"koding/httputil"
 	"koding/kites/kloud/pkg/dnsclient"
 	"koding/kites/kloud/utils"
@@ -31,6 +35,8 @@ import (
 	"github.com/koding/tunnel"
 )
 
+var defaultLog = logging.NewCustom("tunnel", false)
+
 type ServerOptions struct {
 	// Server config.
 	BaseVirtualHost string `json:"baseVirtualHost"`
@@ -43,8 +49,9 @@ type ServerOptions struct {
 	Region      string         `json:"region" required:"true"`
 	Environment string         `json:"environment" required:"true"`
 	Config      *config.Config `json:"kiteConfig"`
-	RegisterURL *url.URL       `json:"registerURL"`
-	KontrolURL  *url.URL       `json:"kontrolURL"`
+	RegisterURL string         `json:"registerURL"`
+	KontrolURL  string         `json:"kontrolURL"`
+	IPURL       string         `json:"ipURL"`
 
 	TCPRangeFrom int    `json:"tcpRangeFrom,omitempty"`
 	TCPRangeTo   int    `json:"tcpRangeTo,omitempty"`
@@ -55,6 +62,65 @@ type ServerOptions struct {
 
 	Log     logging.Logger     `json:"-"`
 	Metrics *metrics.DogStatsD `json:"-"`
+}
+
+func (opts *ServerOptions) registerURL() string {
+	if opts.RegisterURL != "" {
+		return opts.RegisterURL
+	}
+
+	resp, err := http.Get(opts.ipURL())
+	if err != nil {
+		opts.log().Warning("failed requesting ip: %s", err)
+
+		return ""
+	}
+	defer resp.Body.Close()
+
+	// The ip address is 16 chars long, we read more
+	// to account for excessive whitespace.
+	p, err := ioutil.ReadAll(io.LimitReader(resp.Body, 24))
+	if err != nil {
+		opts.log().Warning("failed reading ip: %s", err)
+
+		return ""
+	}
+
+	ip := net.ParseIP(string(bytes.TrimSpace(p)))
+	if ip == nil {
+		opts.log().Warning("failed pasing %q ip", p)
+
+		return ""
+	}
+
+	// TODO(rjeczalik): make the port configurable
+	return "http://" + ip.String() + ":56789/kite"
+
+	return konfig.Builtin.Endpoints.URL("kontrol", opts.Environment)
+}
+
+func (opts *ServerOptions) kontrolURL() string {
+	if opts.KontrolURL != "" {
+		return opts.KontrolURL
+	}
+
+	return konfig.Builtin.Endpoints.URL("kontrol", opts.Environment)
+}
+
+func (opts *ServerOptions) ipURL() string {
+	if opts.IPURL != "" {
+		return opts.IPURL
+	}
+
+	return konfig.Builtin.Endpoints.URL("ip", opts.Environment)
+}
+
+func (opts *ServerOptions) log() logging.Logger {
+	if opts.Log != nil {
+		return opts.Log
+	}
+
+	return defaultLog
 }
 
 // Server represents tunneling server that handles managing authorization
@@ -813,6 +879,8 @@ func NewServerKite(s *Server, name, version string) (*kite.Kite, error) {
 		s.opts.Config = cfg
 	}
 
+	s.opts.Config.KontrolURL = s.opts.kontrolURL()
+
 	if s.opts.Port != 0 {
 		s.opts.Config.Port = s.opts.Port
 	}
@@ -848,8 +916,19 @@ func NewServerKite(s *Server, name, version string) (*kite.Kite, error) {
 	// Route all the rest requests (match all paths that does not begin with /-/).
 	k.HandleHTTP(`/{rest:.?$|[^\/].+|\/[^-].+|\/-[^\/].*}`, s.serverHandler())
 
-	if s.opts.RegisterURL == nil {
-		s.opts.RegisterURL = k.RegisterURL(false)
+	if registerURL := s.opts.registerURL(); registerURL != "" {
+		u, err := url.Parse(registerURL)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing registerURL: %s", err)
+		}
+
+		if err := k.RegisterForever(u); err != nil {
+			return nil, fmt.Errorf("error registering to Kontrol: %s", err)
+		}
+	} else if registerURL := k.RegisterURL(false); registerURL != nil {
+		if err := k.RegisterForever(registerURL); err != nil {
+			return nil, fmt.Errorf("error registering to Kontrol: %s", err)
+		}
 	}
 
 	return k, nil
