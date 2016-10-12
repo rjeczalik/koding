@@ -432,6 +432,9 @@ func (db *mongoDatabase) SetCred(c *Cred) error {
 	}
 
 	perm, err := db.Validate(f, c)
+
+	db.Log.Debug("VALIDATE", perm, err)
+
 	if err == nil {
 		c.Perm = perm
 		return nil
