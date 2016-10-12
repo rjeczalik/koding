@@ -100,6 +100,7 @@ module.exports = globals.config.providers =
     color                  : '#357e99' # dunno
     supported              : yes
     enabled                : 'beta'
+    defaultTemplate        : require './templates/google'
     description            : 'Google compute engine'
     advancedFields         : []
     credentialFields       :
