@@ -1,4 +1,5 @@
 kd                      = require 'kd'
+globals                 = require 'globals'
 KDButtonView            = kd.ButtonView
 Encoder                 = require 'htmlencode'
 curryIn                 = require 'app/util/curryIn'
@@ -25,7 +26,8 @@ module.exports = class StackTemplateView extends kd.View
       else
         content = template.content
     else
-      content = null
+      content     = globals.config.providers.aws.defaultTemplate.yaml
+      contentType = 'yaml'
 
     delegate = @getDelegate()
 
