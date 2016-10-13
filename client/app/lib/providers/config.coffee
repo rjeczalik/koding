@@ -127,6 +127,21 @@ module.exports = globals.config.providers =
           { title: 'Eastern Asia (asia-east1)',     value: 'asia-east1' }
         ]
 
+  digitalocean             :
+    name                   : 'Digital Ocean'
+    link                   : 'https://digitalocean.com'
+    title                  : 'Digitalocean'
+    color                  : '#7abad7'
+    supported              : yes
+    slug                   : 'do'
+    enabled                : 'beta'
+    defaultTemplate        : require './templates/digitalocean'
+    description            : 'Digital Ocean droplets'
+    credentialFields       :
+      access_token         :
+        label              : 'Personal Access Token'
+        placeholder        : 'Digital Ocean access token'
+
   azure                    :
     name                   : 'Azure'
     link                   : 'https://azure.microsoft.com/'
@@ -144,28 +159,12 @@ module.exports = globals.config.providers =
         placeholder        : 'azure secret'
         type               : 'password'
 
-  digitalocean             :
-    name                   : 'Digital Ocean'
-    link                   : 'https://digitalocean.com'
-    title                  : 'Digitalocean'
-    color                  : '#7abad7'
-    supported              : yes
-    enabled                : no
-    description            : 'Digitalocean droplets'
-    credentialFields       :
-      clientId             :
-        label              : 'Client Id'
-        placeholder        : 'client id in digitalocean'
-      apiKey               :
-        label              : 'API Key'
-        placeholder        : 'digitalocean api key'
-
   rackspace                :
     name                   : 'Rackspace'
     link                   : 'http://www.rackspace.com'
     title                  : 'Rackspace'
     color                  : '#d8deea'
-    supported              : yes
+    supported              : no
     enabled                : no
     description            : 'Rackspace machines'
     credentialFields       :
@@ -181,7 +180,7 @@ module.exports = globals.config.providers =
     link                   : 'http://www.softlayer.com'
     title                  : 'Softlayer'
     color                  : '#B52025'
-    supported              : no
+    supported              : yes
     enabled                : no
     description            : 'Softlayer resources'
     credentialFields       :
