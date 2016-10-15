@@ -36,6 +36,10 @@ module.exports = globals.config.providers =
                               'ami', 'acl', 'cidr_block',
                               'igw', 'rtb'
                              ]
+    attributeMapping       :
+      image                : 'ami'
+      instance_type        : 'instance_type'
+      storage_size         : 'storage'
     credentialFields       :
       access_key           :
         label              : 'Access Key ID'
@@ -137,6 +141,10 @@ module.exports = globals.config.providers =
     enabled                : 'beta'
     defaultTemplate        : require './templates/digitalocean'
     description            : 'Digital Ocean droplets'
+    attributeMapping       :
+      image                : 'image'
+      instance_type        : 'size'
+      region               : 'region'
     credentialFields       :
       access_token         :
         label              : 'Personal Access Token'
