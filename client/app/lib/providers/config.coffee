@@ -107,6 +107,10 @@ module.exports = globals.config.providers =
     enabled                : 'beta'
     defaultTemplate        : require './templates/google'
     description            : 'Google compute engine'
+    attributeMapping       :
+      image                : 'disk.0.image' # getting the first disk image ~ GG
+      instance_type        : 'machine_type'
+      region               : 'zone'
     credentialFields       :
       project              :
         label              : 'Project ID'
