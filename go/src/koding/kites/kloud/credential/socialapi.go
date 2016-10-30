@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 
 	"koding/db/mongodb/modelhelper"
@@ -174,7 +175,7 @@ func (s *socialStore) do(req *socialRequest) error {
 	}
 
 	if req.resp != nil {
-		err := json.NewDecoder(resp.Body).Decode(req.resp)
+		err := json.NewDecoder(io.TeeReader(resp.Body, os.Stderr)).Decode(req.resp)
 		if err != nil {
 			return fmt.Errorf("%q: failed decoding data: %s", req.ident, err)
 		}
