@@ -160,6 +160,7 @@ module.exports = globals.config.providers =
     color                  : '#ec06be'
     supported              : yes
     enabled                : no
+    defaultTemplate        : require './templates/azure'
     description            : 'Azure'
     credentialFields       :
       accountId            :
