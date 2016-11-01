@@ -32,4 +32,4 @@ module.exports =
     cpu: '32x CPU'
     description: 'Standard 32 CPU machine type with 32 virtual CPUs and 120 GB of memory.'
 
-  'base-vm': 'f1-micro'
+  'base-vm': 'f1-microw'
