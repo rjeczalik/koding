@@ -186,13 +186,13 @@ func (s *Stack) ApplyTemplate(c *stack.Credential) (*stack.Template, error) {
 			}
 		}
 
-		pass, _ := vm["password"].(string)
-		thumb, _ := vm["ssh_key_thumbprint"].(string)
+		// pass, _ := vm["password"].(string)
+		// thumb, _ := vm["ssh_key_thumbprint"].(string)
 
 		// Use kloud key if no required resource arguments were configured.
-		if pass == "" && thumb == "" {
-			vm["ssh_key_thumbprint"] = s.SSHKeyThumbprint
-		}
+		// if pass == "" && thumb == "" {
+		//	vm["ssh_key_thumbprint"] = s.SSHKeyThumbprint
+		// }
 
 		s.injectBoostrap(vm, cred, boot)
 
