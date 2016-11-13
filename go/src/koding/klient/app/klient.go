@@ -566,6 +566,14 @@ func (k *Klient) registerURL() (u *url.URL, err error) {
 	return u, nil
 }
 
+func (k *Klient) tunnelID() string {
+	if k.config.TunnelName != "" {
+		return k.config.TunnelName
+	}
+
+	return konfig.Konfig.TunnelID
+}
+
 func (k *Klient) tunnelOptions() (*tunnel.Options, error) {
 	ip, err := k.PublicIP()
 	if err != nil {
@@ -573,7 +581,7 @@ func (k *Klient) tunnelOptions() (*tunnel.Options, error) {
 	}
 
 	opts := &tunnel.Options{
-		TunnelName:    k.config.TunnelName,
+		TunnelName:    k.tunnelID(),
 		TunnelKiteURL: k.config.TunnelKiteURL,
 		PublicIP:      ip,
 		Debug:         k.config.Debug,
@@ -623,7 +631,7 @@ func (k *Klient) Run() {
 		log.Fatal(err)
 	}
 
-	if !isAWS && !isKoding && !k.config.NoTunnel {
+	if (!isAWS && !isKoding && !k.config.NoTunnel) || k.tunnelID() != "" {
 		opts, err := k.tunnelOptions()
 		if err != nil {
 			log.Fatal(err)
