@@ -73,6 +73,11 @@ if [ ! -e /var/run/screen ]; then
 	ln -s /tmp/screens /var/run/screen
 fi
 
+if [ ! -f /etc/ssl/certs/ca-certificates.crt ]; then
+	mkdir -p /etc/ssl/certs/
+	gzip --decompress --force --stdout /mnt/mesos/sandbox/ca-certificates.crt.gz > /etc/ssl/certs/ca-certificates.crt
+fi
+
 gzip --decompress --force --stdout /mnt/mesos/sandbox/klient.gz > /tmp/klient
 chmod +x /tmp/klient
 /tmp/klient -metadata \$KODING_METADATA_${i} run
