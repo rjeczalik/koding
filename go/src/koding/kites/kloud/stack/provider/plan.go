@@ -29,6 +29,7 @@ func (bs *BaseStack) HandlePlan(ctx context.Context) (interface{}, error) {
 	bs.Arg = arg
 
 	bs.Log.Debug("Fetching template for id %s", arg.StackTemplateID)
+
 	stackTemplate, err := modelhelper.GetStackTemplate(arg.StackTemplateID)
 	if err != nil {
 		return nil, models.ResError(err, "jStackTemplate")
@@ -50,23 +51,23 @@ func (bs *BaseStack) HandlePlan(ctx context.Context) (interface{}, error) {
 
 	contentID := bs.Req.Username + "-" + arg.StackTemplateID
 
-	bs.Log.Debug("Parsing template (%s):\n%s", contentID, stackTemplate.Template.Content)
+	bs.Log.Debug("Stack template before plan: %s", contentID, &stack.Template{Content: stackTemplate.Template.Content})
 
 	if err := bs.Builder.BuildTemplate(stackTemplate.Template.Content, contentID); err != nil {
 		return nil, err
 	}
 
-	if cred, err := bs.Builder.CredentialByProvider(bs.Provider.Name); err == nil {
-		if _, err := bs.stack.ApplyTemplate(cred); err != nil {
-			return nil, err
-		}
-	} else {
-		bs.Log.Debug("no credentials found for %q: %s", bs.Provider.Name, err)
-
-		if err := bs.Builder.Template.FillVariables(bs.Provider.Name + "_"); err != nil {
-			return nil, err
-		}
+	cred, err := bs.Builder.CredentialByProvider(bs.Provider.Name)
+	if err != nil {
+		return nil, err
 	}
+
+	t, err := bs.stack.ApplyTemplate(cred)
+	if err != nil {
+		return nil, err
+	}
+
+	bs.Log.Debug("Stack template after injecting Koding data: %s", t)
 
 	// Plan request is made right away the template is saved, it may
 	// not have all the credentials provided yet. We set them all to
