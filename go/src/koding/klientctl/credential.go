@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"koding/kites/kloud/utils/object"
 	"koding/klientctl/kloud/credential"
@@ -61,7 +63,7 @@ func askSecret(format string, args ...interface{}) (string, error) {
 	return string(p), nil
 }
 
-func AskCredential(c *cli.Context) (provider string, creds map[string]string, err error) {
+func AskCredential(c *cli.Context) (provider string, creds map[string]interface{}, err error) {
 	descs, err := credential.Describe()
 	if err != nil {
 		return "", nil, err
@@ -83,7 +85,7 @@ func AskCredential(c *cli.Context) (provider string, creds map[string]string, er
 		return "", nil, fmt.Errorf("provider %q does not exist", provider)
 	}
 
-	creds = make(map[string]string, len(desc.Credential))
+	creds = make(map[string]interface{}, len(desc.Credential))
 
 	// TODO(rjeczalik): Add field.OmitEmpty so we validate required
 	// fields client-side.
@@ -99,10 +101,15 @@ func AskCredential(c *cli.Context) (provider string, creds map[string]string, er
 		} else {
 			var defaultValue string
 
-			if len(field.Values) > 0 {
+			switch {
+			case len(field.Values) > 0:
 				if s, ok := field.Values[0].Value.(string); ok {
 					defaultValue = s
 				}
+			case field.Type == "duration":
+				defaultValue = "0s"
+			case field.Type == "integer":
+				defaultValue = "0"
 			}
 
 			value, err = ask("%s [%s]: ", field.Label, defaultValue)
@@ -116,7 +123,24 @@ func AskCredential(c *cli.Context) (provider string, creds map[string]string, er
 			return "", nil, err
 		}
 
-		creds[field.Name] = value
+		switch field.Type {
+		case "integer":
+			n, err := strconv.Atoi(value)
+			if err != nil {
+				return "", nil, fmt.Errorf("invalid integer for %q field: %s", field.Label, err)
+			}
+
+			creds[field.Name] = n
+		case "duration":
+			d, err := time.ParseDuration(value)
+			if err != nil {
+				return "", nil, fmt.Errorf("invalid time duration for %q field: %s", field.Label, err)
+			}
+
+			creds[field.Name] = d
+		default:
+			creds[field.Name] = value
+		}
 	}
 
 	return provider, creds, nil
