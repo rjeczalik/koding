@@ -1,12 +1,14 @@
 package modelhelper_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"koding/db/models"
 	"koding/db/mongodb/modelhelper"
 	"koding/db/mongodb/modelhelper/modeltesthelper"
+	"koding/helpers"
 
 	"gopkg.in/mgo.v2/bson"
 )
@@ -140,5 +142,43 @@ func TestGetMachinesByUsernameAndProvider(t *testing.T) {
 
 	if len(machines) != 1 {
 		t.Errorf("machine count should be 2, got: %d", len(machines))
+	}
+}
+
+func TestMachineIter(t *testing.T) {
+	db := modeltesthelper.NewMongoDB(t)
+	defer db.Close()
+
+	m := []*models.Machine{{
+		ObjectId: bson.NewObjectId(),
+		Uid:      bson.NewObjectId().Hex(),
+	}, {
+		ObjectId:  bson.NewObjectId(),
+		IpAddress: "127.0.0.1",
+	}, {
+		ObjectId: bson.NewObjectId(),
+		Label:    "abc",
+	}}
+
+	for _, m := range m {
+		if err := modelhelper.CreateMachine(m); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	var machine models.Machine
+
+	it := helpers.NewIterOptions()
+	it.CollectionName = modelhelper.MachinesColl
+	it.F = func(v interface{}) error {
+		fmt.Printf("(%p) %v\n", v, v)
+		return nil
+	}
+	it.Filter = modelhelper.Selector{}
+	it.Result = &machine
+
+	err := helpers.Iter(db.DB, it)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
