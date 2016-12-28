@@ -171,6 +171,7 @@ func New(conf *Config) (*Kloud, error) {
 	e := newEndpoints(conf)
 
 	sess.Log.Debug("Konfig.Endpoints: %s", util.LazyJSON(e))
+	sess.Log.Debug("endpoints: %s", util.LazyJSON(config.NewKonfig(&config.Environments{Env: conf.Environment}).Endpoints))
 
 	authUsers := map[string]string{
 		"kloudctl": conf.KloudSecretKey,
