@@ -166,9 +166,13 @@ module.exports = class JStackTemplate extends Module
     return config
 
 
-  validateTemplate = (template, group, callback) ->
+  validateTemplate = (templateData, group, callback) ->
 
-    limitConfig = helpers.getLimitConfig group
+    unless templateData
+      return callback new KodingError 'Template data is required!'
+
+    { template } = templateData
+    limitConfig  = helpers.getLimitConfig group
     return callback null  unless limitConfig.limit # No limit, no pain.
 
     ComputeProvider = require './computeprovider'
@@ -210,10 +214,7 @@ module.exports = class JStackTemplate extends Module
       { group }    = client.r # we have revived JGroup and JUser here ~ GG
       { delegate } = client.connection
 
-      unless data?.title
-        return callback new KodingError 'Title required.'
-
-      validateTemplate data.template, group, (err) ->
+      validateTemplate data, group, (err) ->
         return callback err  if err
 
         if data.config?
