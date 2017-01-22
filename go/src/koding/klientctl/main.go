@@ -583,6 +583,7 @@ func run(args []string) {
 						cli.StringFlag{
 							Name:  "baseurl",
 							Usage: "Specify a Koding endpoint to log in.",
+							Value: config.Konfig.Endpoints.Koding.Public.String(),
 						},
 						cli.StringFlag{
 							Name:  "token",
