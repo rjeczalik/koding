@@ -16,7 +16,15 @@ import (
 	"strconv"
 )
 
-var output = flag.String("o", "testdata/koding.json.gz", "")
+var output = flag.String("o", filepath.FromSlash("testdata/koding.json.gz"), "output file")
+var schrink = flag.Int64("s", 5, "schrink tree by the given multiplier")
+
+func max(i, j int64) int64 {
+	if i > j {
+		return i
+	}
+	return j
+}
 
 func nonil(err ...error) error {
 	for _, e := range err {
@@ -82,6 +90,16 @@ func main() {
 		die(err)
 	}
 
+	var sum int64
+	for file, size := range m {
+		if *schrink > 1 {
+			size = max(size / *schrink, 1)
+			m[file] = size
+		}
+
+		sum += size
+	}
+
 	gw := gzip.NewWriter(f)
 	enc := json.NewEncoder(gw)
 
@@ -89,5 +107,5 @@ func main() {
 		die(err)
 	}
 
-	fmt.Println(*output, "was written succesfully")
+	fmt.Printf("%q was written succesfully (total size %.4f MiB)\n", *output, float64(sum)/1024/1024)
 }

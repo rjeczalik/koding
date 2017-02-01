@@ -2,12 +2,16 @@ package index
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -243,21 +247,73 @@ func TestIndexJSON(t *testing.T) {
 }
 
 func generateTree() (root string, clean func(), err error) {
+	return generate(filetree)
+}
+
+func generate(tree map[string]int64) (root string, clean func(), err error) {
+	type item struct {
+		file string
+		size int64
+	}
+
 	root, err = ioutil.TempDir("", "mount.index")
 	if err != nil {
 		return "", nil, err
 	}
 	clean = func() { os.RemoveAll(root) }
 
-	for file, size := range filetree {
-		if err := addDir(file)(root); err != nil {
-			clean()
-			return "", nil, err
+	items := make(chan item)
+
+	go func() {
+		for file, size := range tree {
+			items <- item{
+				file: file,
+				size: size,
+			}
 		}
-		if err := writeFile(file, size)(root); err != nil {
-			clean()
-			return "", nil, err
-		}
+
+		close(items)
+	}()
+
+	var wg sync.WaitGroup
+	n := 2 * runtime.NumCPU()
+	ch := make(chan error, n)
+	done := make(chan struct{})
+	counter := int32(0)
+
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	fmt.Fprintf(os.Stderr, "Generating tree at %q... (%d files, %d goroutines)\n", root, len(tree), n)
+
+	for ; n > 0; n-- {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for item := range items {
+				if err := addDir(item.file)(root); err != nil {
+					ch <- err
+					return
+				}
+				if err := writeFile(item.file, item.size)(root); err != nil {
+					ch <- err
+					return
+				}
+
+				if n := atomic.AddInt32(&counter, 1); n%1000 == 0 && n != 0 {
+					fmt.Printf("Writing files %d/%d...\n", n, len(tree))
+				}
+			}
+		}()
+	}
+
+	select {
+	case <-done:
+	case <-ch:
+		clean()
+		return "", nil, err
 	}
 
 	return root, clean, nil
