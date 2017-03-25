@@ -1,9 +1,11 @@
 package config
 
 import (
-	"koding/httputil"
+	"net/http"
+	"time"
 
 	"github.com/koding/kite/config"
+	"github.com/lucas-clemente/quic-go/h2quic"
 )
 
 // Disabling compression due to errors like:
@@ -27,9 +29,16 @@ func ReadKiteConfig(debug bool) (*config.Config, error) {
 	}
 
 	// cfg.Websocket.EnableCompression = true
-	cfg.Client = httputil.Client(debug)
-	cfg.XHR = httputil.ClientXHR(debug)
-	cfg.Transport = config.XHRPolling
+	// cfg.Client = httputil.Client(debug)
+	// cfg.XHR = httputil.ClientXHR(debug)
+	cfg.Client = &http.Client{
+		Timeout:   15 * time.Second,
+		Transport: &h2quic.QuicRoundTripper{},
+	}
+	cfg.XHR = &http.Client{
+		Transport: &h2quic.QuicRoundTripper{},
+	}
+	// cfg.Transport = config.XHRPolling
 
 	return cfg, nil
 }
@@ -40,9 +49,16 @@ func NewKiteConfig(debug bool) *config.Config {
 	cfg := config.New()
 
 	// cfg.Websocket.EnableCompression = true
-	cfg.Client = httputil.Client(debug)
-	cfg.XHR = httputil.ClientXHR(debug)
-	cfg.Transport = config.XHRPolling
+	// cfg.Client = httputil.Client(debug)
+	// cfg.XHR = httputil.ClientXHR(debug)
+	cfg.Client = &http.Client{
+		Timeout:   15 * time.Second,
+		Transport: &h2quic.QuicRoundTripper{},
+	}
+	cfg.XHR = &http.Client{
+		Transport: &h2quic.QuicRoundTripper{},
+	}
+	// cfg.Transport = config.XHRPolling
 
 	return cfg
 }
