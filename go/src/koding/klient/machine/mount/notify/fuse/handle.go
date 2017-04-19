@@ -11,6 +11,7 @@ import (
 
 	"github.com/jacobsa/fuse"
 	"github.com/jacobsa/fuse/fuseops"
+	"log"
 )
 
 // MinHandleID defines the minimum value of file handle.
@@ -96,10 +97,12 @@ func (fhg *FileHandleGroup) Add(inodeID fuseops.InodeID, f *os.File, size int64)
 	*fh.size = size
 
 	fhg.mu.Lock()
+	log.Println("Handle: ", handleID, " for", fh.InodeID, " file:", f.Name())
 	if _, ok := fhg.handles[handleID]; ok {
 		panic("duplicated handle identifier")
 	}
 	fhg.handles[handleID] = fh
+	log.Println("Added Handle: ", handleID, " len:", len(fhg.handles))
 	fhg.mu.Unlock()
 
 	return handleID
@@ -107,6 +110,7 @@ func (fhg *FileHandleGroup) Add(inodeID fuseops.InodeID, f *os.File, size int64)
 
 // Open opens a file pointed by a given node. The node must exist.
 func (fhg *FileHandleGroup) Open(root string, n *node.Node) (fuseops.HandleID, error) {
+	log.Println("Open file: ", n.Path())
 	if !n.Exist() {
 		return 0, fuse.ENOENT
 	}
@@ -123,19 +127,23 @@ func (fhg *FileHandleGroup) Open(root string, n *node.Node) (fuseops.HandleID, e
 		return 0, toErrno(err)
 	}
 
+	log.Println("Open ok: ", n.Path())
 	return fhg.Add(fuseops.InodeID(n.Entry.Virtual.Inode), f, n.Entry.File.Size), nil
 }
 
 // Get gets the FileHandle structure associated with provided handle ID.
 func (fhg *FileHandleGroup) Get(handleID fuseops.HandleID) (fh FileHandle, err error) {
 	fhg.mu.Lock()
+	log.Println("Looking up for ID: ", handleID)
 	fh, ok := fhg.handles[handleID]
 	fhg.mu.Unlock()
 
 	if !ok {
+		log.Println("Not found: ", handleID, fh.InodeID)
 		return fh, fuse.EINVAL
 	}
 
+	log.Println("Found: ", handleID, fh.InodeID)
 	return fh, nil
 }
 

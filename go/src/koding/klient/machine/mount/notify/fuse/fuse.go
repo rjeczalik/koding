@@ -13,6 +13,7 @@ import (
 	"github.com/jacobsa/fuse/fuseops"
 	"github.com/jacobsa/fuse/fuseutil"
 	"golang.org/x/net/context"
+	"log"
 )
 
 // StatFS sets filesystem metadata.
@@ -554,6 +555,7 @@ func (fs *Filesystem) OpenFile(ctx context.Context, op *fuseops.OpenFileOp) (err
 		}
 
 		var h fuseops.HandleID
+		log.Println("FILE Open: ", fs.CacheDir, n.Path())
 		if h, err = fs.fileHandles.Open(fs.CacheDir, n); err != nil {
 			return
 		}
@@ -567,13 +569,29 @@ func (fs *Filesystem) OpenFile(ctx context.Context, op *fuseops.OpenFileOp) (err
 // ReadFile reads contents of a specified file starting from specified offset.
 // It returns `io.EIO` if specified offset is larger than the length of contents
 // of the file.
-func (fs *Filesystem) ReadFile(_ context.Context, op *fuseops.ReadFileOp) error {
-	fh, err := fs.fileHandles.Get(op.Handle)
+func (fs *Filesystem) ReadFile(_ context.Context, op *fuseops.ReadFileOp) (err error) {
+	defer func() {
+		if err != nil {
+			log.Println(">> ERROR:", err)
+		}
+	}()
+
+	var fh FileHandle
+	fh, err = fs.fileHandles.Get(op.Handle)
 	if err != nil {
 		return err
 	}
 
 	if op.BytesRead, err = fh.File.ReadAt(op.Dst, op.Offset); err != nil && err != io.EOF {
+		log.Println("READ Error: ", err, fh.InodeID)
+		fs.Index.Tree().DoInode(uint64(fh.InodeID), func(_ node.Guard, n *node.Node) {
+			if n == nil {
+				log.Println("NIL NODE")
+				return
+			}
+
+			log.Println("NODE PATH ", n.Path(), " NODE:", n)
+		})
 		err = toErrno(err)
 		return err
 	}
