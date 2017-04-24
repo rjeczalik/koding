@@ -56,6 +56,11 @@ func (bs *BaseStack) BuildUserdata(name string, vm map[string]interface{}) error
 		delete(vm, "koding_debug")
 	}
 
+	if v, ok := vm["koding_mounts"]; ok {
+		cfg.Mounts = tomap(v)
+		delete(vm, "koding_mounts")
+	}
+
 	var meta map[string]interface{}
 
 	if b, ok := vm["koding_always_on"].(bool); ok {
@@ -96,4 +101,39 @@ func (bs *BaseStack) BuildUserdata(name string, vm map[string]interface{}) error
 	}
 
 	return nil
+}
+
+// TODO(rjeczalik): move to utils/object package
+func tomap(v interface{}) map[string]string {
+	var m map[string]string
+
+	switch v := v.(type) {
+	case map[string]string:
+		m = v
+	case map[string]interface{}:
+		m = make(map[string]string, len(v))
+
+		for k, v := range v {
+			m[k] = tostring(v)
+		}
+	case map[interface{}]interface{}:
+		m = make(map[string]string, len(v))
+
+		for k, v := range v {
+			m[tostring(k)] = tostring(v)
+		}
+	}
+
+	return m
+}
+
+func tostring(v interface{}) string {
+	switch v := v.(type) {
+	case string:
+		return v
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
