@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"koding/klient/machine/index"
 	"koding/klient/machine/transport/rsync"
@@ -95,6 +96,7 @@ func (p *Prefetch) Run(w io.Writer, s Strategy, privPath string) error {
 		SSHPort:         p.SSHPort,
 		PrivateKeyPath:  privPath,
 		Progress:        rsync.Progress(w, p.Count, p.DiskSize),
+		Output:          os.Stderr,
 	}
 
 	// Create initial progess report and run the command.

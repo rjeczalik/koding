@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -140,6 +142,7 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 			"ssh", "-T", "-x", "-i", c.PrivateKeyPath,
 			"-oCompression=no",
 			"-oStrictHostKeychecking=no",
+			"-oUserKnownHostsFile=/dev/null",
 		}
 
 		if c.SSHPort > 0 {
@@ -189,6 +192,8 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 	} else {
 		c.Cmd.Args = append(c.Cmd.Args, c.SourcePath, c.DestinationPath)
 	}
+
+	fmt.Fprintln(os.Stderr, c.Cmd.Dir, "RSYNC", c.Cmd.Args)
 
 	c.Cmd.Stderr = noNilMultiWriter(c.Cmd.Stderr, c.Output)
 	if c.Progress == nil {
