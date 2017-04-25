@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kr/pretty"
+
 	"koding/kites/kloud/metadata"
 	"koding/kites/kloud/stack"
 )
@@ -58,6 +60,7 @@ func (bs *BaseStack) BuildUserdata(name string, vm map[string]interface{}) error
 
 	if v, ok := vm["koding_mounts"]; ok {
 		cfg.Mounts = tomap(v)
+		pretty.Println("koding_mounts", v, cfg.Mounts)
 		delete(vm, "koding_mounts")
 	}
 
