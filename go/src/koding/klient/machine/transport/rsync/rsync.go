@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -184,7 +185,7 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 
 	// Progress logic needs verbose mode with itemized changes.
 	if c.Progress != nil {
-		c.Cmd.Args = append(c.Cmd.Args, "-Piv")
+		c.Cmd.Args = append(c.Cmd.Args, "--bwlimit=20", "-Piv")
 		if c.Change == nil {
 			// Do not use recursive downloads for index changes.
 			c.Cmd.Args = append(c.Cmd.Args, "-r")
@@ -224,6 +225,7 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 		r = io.TeeReader(rc, c.Output)
 	}
 
+	log.Println("RSYNC: ", c.Cmd.Args)
 	if err := c.Cmd.Start(); err != nil {
 		return err
 	}
@@ -288,6 +290,7 @@ func (c *Command) scan(r io.Reader) {
 		}
 
 		line := scanner.Text()
+		log.Println(">> ", line)
 		if bitRe.MatchString(line) {
 			size += part
 			n++
