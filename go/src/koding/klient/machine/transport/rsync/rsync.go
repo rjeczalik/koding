@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -225,7 +224,6 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 		r = io.TeeReader(rc, c.Output)
 	}
 
-	log.Println("RSYNC: ", c.Cmd.Args)
 	if err := c.Cmd.Start(); err != nil {
 		return err
 	}
@@ -245,7 +243,7 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 
 var (
 	rmComma = strings.NewReplacer(",", "")
-	bitRe   = regexp.MustCompile(`^[.><ch*].......... .`)
+	bitRe   = regexp.MustCompile(`^[.><ch*].{7,11} .`)
 	sizeRe  = regexp.MustCompile(`^\s*([\d,]+)\s+\d+%.*$`)
 	totalRe = regexp.MustCompile(`^[^\d]*([\d,]+).*DRY\sRUN.*$`)
 )
@@ -290,7 +288,6 @@ func (c *Command) scan(r io.Reader) {
 		}
 
 		line := scanner.Text()
-		log.Println(">> ", line)
 		if bitRe.MatchString(line) {
 			size += part
 			n++
