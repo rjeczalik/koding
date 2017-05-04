@@ -213,7 +213,7 @@ func NewSync(mountID ID, m Mount, opts Options) (*Sync, error) {
 	}
 
 	// Enable syncing history for all mounts.
-	s.s = history.NewHistory(syncer, 100)
+	s.s = history.NewHistory(syncer, 1e7)
 
 	return s, nil
 }

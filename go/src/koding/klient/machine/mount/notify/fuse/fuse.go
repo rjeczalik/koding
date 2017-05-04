@@ -1,6 +1,7 @@
 package fuse
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -353,6 +354,8 @@ func (fs *Filesystem) RmDir(ctx context.Context, op *fuseops.RmDirOp) error {
 // remove any data since this should be done in ForgetInode method.
 func (fs *Filesystem) Unlink(_ context.Context, op *fuseops.UnlinkOp) (err error) {
 	fs.Index.Tree().DoInode(uint64(op.Parent), func(g node.Guard, n *node.Node) {
+		fmt.Printf("[FUSE] Unlink: %s/%s\n", n.Path(), op.Name)
+
 		// Allow deleted nodes.
 		if n == nil {
 			err = fuse.ENOENT
@@ -372,6 +375,11 @@ func (fs *Filesystem) Unlink(_ context.Context, op *fuseops.UnlinkOp) (err error
 
 		// Remove name from the
 		if !n.Orphan() || n.Entry.File.Inode == node.RootInodeID {
+
+			path := filepath.Join(fs.CacheDir, child.Path())
+
+			fmt.Printf("[FUSE] Unlink: orphan: %s\n", path)
+
 			var e error
 			if child.Entry.File.Mode.IsDir() {
 				e = syscall.Rmdir(filepath.Join(fs.CacheDir, child.Path()))
@@ -400,6 +408,8 @@ func (fs *Filesystem) Unlink(_ context.Context, op *fuseops.UnlinkOp) (err error
 // from tree.
 func (fs *Filesystem) ForgetInode(ctx context.Context, op *fuseops.ForgetInodeOp) (err error) {
 	fs.Index.Tree().DoInode(uint64(op.Inode), func(g node.Guard, n *node.Node) {
+		fmt.Printf("[FUSE] ForgetInode: %s\n", n.Path())
+
 		// Nil means that inode was already forgotten.
 		if n == nil {
 			return
@@ -409,9 +419,12 @@ func (fs *Filesystem) ForgetInode(ctx context.Context, op *fuseops.ForgetInodeOp
 			return
 		}
 
-		// Clean up tree.
-		if n.Orphan() && n.Entry.File.Inode != node.RootInodeID {
+		// Orphan nodes are needed only by kernel, they are no real
+		// representation in underlying filesystem.
+		if n.Orphan() {
+			fmt.Printf("[FUSE] ForgetInode: orphan: %s\n", n.Path())
 			g.RmOrphan(n)
+			return
 		}
 	})
 

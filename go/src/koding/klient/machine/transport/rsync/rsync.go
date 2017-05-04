@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -204,6 +205,8 @@ func (c *Command) run(ctx context.Context, scan func(r io.Reader)) error {
 	} else {
 		c.Cmd.Args = append(c.Cmd.Args, c.SourcePath, c.DestinationPath)
 	}
+
+	fmt.Printf("[RSYNC] Running: %v\n", c.Cmd.Args)
 
 	var errBuf bytes.Buffer
 	c.Cmd.Stderr = noNilMultiWriter(c.Cmd.Stderr, c.Output, &errBuf)

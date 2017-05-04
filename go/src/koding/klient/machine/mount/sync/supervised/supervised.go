@@ -2,6 +2,8 @@ package supervised
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 	"sync"
 	"time"
 
@@ -108,6 +110,9 @@ func (s *Supervised) ExecStream(evC <-chan *msync.Event) <-chan msync.Execer {
 				if sy == nil {
 					rebuild()
 				} else {
+					if reflect.ValueOf(sy).IsNil() {
+						fmt.Printf("[SUPERVISED] sy is nil: %#v\n", sy)
+					}
 					sy.Close()
 				}
 			case <-s.stopC:
