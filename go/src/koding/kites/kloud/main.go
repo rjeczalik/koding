@@ -10,6 +10,7 @@ import (
 	konfig "koding/kites/config"
 	"koding/kites/kloud/kloud"
 	"koding/kites/kloud/stack"
+	"koding/tools/util"
 
 	"github.com/koding/multiconfig"
 )
@@ -57,9 +58,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Printf("[DEBUG] kite environment: %s\n", k.Kite.Config.Environment)
+
 	stack.Konfig = konfig.NewKonfig(&konfig.Environments{
 		Env: k.Kite.Config.Environment,
 	})
+
+	fmt.Println("[DEBUG] stack.Konfig:", util.LazyJSON(stack.Konfig))
+	fmt.Println("[DEBUG] klient_url:", stack.Konfig.KlientGzURL())
 
 	// DataDog listens to it
 	go func() {

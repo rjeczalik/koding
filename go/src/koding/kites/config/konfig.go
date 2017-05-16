@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/url"
 	"os"
@@ -350,6 +351,10 @@ func (e *Environments) kdEnv() string {
 // NewKonfig creates new configuration by reading
 // embedded kites/config/config.json file.
 func NewKonfig(e *Environments) *Konfig {
+	fmt.Println("[DEBUG] Builtin.Endpoints.KlientLatest:", Builtin.Endpoints.KlientLatest)
+	fmt.Println("[DEBUG] e.klientEnv():", e.klientEnv())
+	fmt.Println("[DEBUG] final:", ReplaceEnv(Builtin.Endpoints.KlientLatest, e.klientEnv()))
+
 	return &Konfig{
 		Environment: e.Env,
 		Endpoints: &Endpoints{
