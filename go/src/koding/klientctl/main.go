@@ -64,7 +64,10 @@ var signals = []os.Signal{
 // cli rewrite.
 var log logging.Logger
 
-var debug = os.Getenv("KD_DEBUG") == "1"
+var (
+	debug        = os.Getenv("KD_DEBUG") == "1"
+	experimental = os.Getenv("KD_EXPERIMENTAL") == "1" || config.Konfig.Environment == "development"
+)
 
 func main() {
 	run(os.Args)
@@ -994,6 +997,16 @@ error opening: %s
 			},
 		}},
 	}}
+
+	if experimental {
+		app.Commands = append(app.Commands,
+			cli.Command{
+				Name:   "live",
+				Usage:  "Publish you project live.",
+				Action: ctlcli.ExitErrAction(Live, log, "live"),
+			},
+		)
+	}
 
 	// Alias commands.
 	app.Commands = append(app.Commands,
